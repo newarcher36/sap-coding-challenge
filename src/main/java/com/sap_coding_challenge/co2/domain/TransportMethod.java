@@ -29,10 +29,6 @@ public enum TransportMethod {
         this.gramsPerKm = gramsPerKm;
     }
 
-    public String getKey() {
-        return key;
-    }
-
     public int getGramsPerKm() {
         return gramsPerKm;
     }

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# Launch the packaged CO2 calculator JAR from the local Maven build output.
+set -euo pipefail
+
+# Resolve the script directory so the jar can be found even when called via symlink.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+JAR_PATH="${SCRIPT_DIR}/target/co2-calculator-1.0.0.jar"
+
+# Warn the caller when the jar is missing and point them to the build command.
+if [[ ! -f "${JAR_PATH}" ]]; then
+  echo "error: ${JAR_PATH} not found. Build the project first with ./mvnw package." >&2
+  exit 1
+fi
+
+# Replace the shell with the JVM process while forwarding all CLI arguments.
+exec java -jar "${JAR_PATH}" "$@"
