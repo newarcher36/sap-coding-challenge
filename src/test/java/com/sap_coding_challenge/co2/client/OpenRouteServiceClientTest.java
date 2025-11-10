@@ -49,9 +49,8 @@ class OpenRouteServiceClientTest {
                         }
                         """)));
 
-        var client = newClient();
+        var coordinates = newClient().fetchCityCoordinates("Hamburg");
 
-        var coordinates = client.fetchCityCoordinates("Hamburg");
         assertThat(coordinates.longitude()).isEqualByComparingTo("10.000654");
         assertThat(coordinates.latitude()).isEqualByComparingTo("53.550341");
 
@@ -65,13 +64,11 @@ class OpenRouteServiceClientTest {
     void fetchCityCoordinatesPropagatesHttpErrors() {
         wireMock.stubFor(get(urlPathEqualTo("/geocode/search"))
                 .withHeader("Authorization", equalTo(API_KEY))
-                .withQueryParam("text", equalTo("Hamburg"))
-                .withQueryParam("layers", equalTo("locality"))
+                .withQueryParam("text", matching(".+"))
+                .withQueryParam("layers", matching(".+"))
                 .willReturn(aResponse().withStatus(404)));
 
-        var client = newClient();
-
-        assertThatThrownBy(() -> client.fetchCityCoordinates("Hamburg"))
+        assertThatThrownBy(() -> newClient().fetchCityCoordinates("Hamburg"))
                 .isInstanceOf(IOException.class)
                 .hasMessage("Could not fetch coordinates for city \"Hamburg\": HTTP 404");
     }
@@ -85,9 +82,7 @@ class OpenRouteServiceClientTest {
                 .withQueryParam("layers", equalTo("locality"))
                 .willReturn(okJson(responseBody)));
 
-        var client = newClient();
-
-        assertThatThrownBy(() -> client.fetchCityCoordinates("Atlantis"))
+        assertThatThrownBy(() -> newClient().fetchCityCoordinates("Atlantis"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Could not fetch coordinates for city \"Atlantis\".");
     }
@@ -96,6 +91,7 @@ class OpenRouteServiceClientTest {
     void fetchDistanceBetweenLocalitiesReturnsKilometers() throws IOException {
         wireMock.stubFor(post(urlPathEqualTo("/v2/matrix/driving-car"))
                 .withHeader("Authorization", equalTo(API_KEY))
+                .withHeader("Content-Type", containing("application/json"))
                 .willReturn(okJson("""
                         {
                           "distances": [
@@ -105,8 +101,7 @@ class OpenRouteServiceClientTest {
                         }
                         """)));
 
-        var client = newClient();
-        var kilometers = client.fetchDistanceBetweenLocalities(
+        var kilometers = newClient().fetchDistanceBetweenLocalities(
                 new Coordinates(new BigDecimal("10.000654"), new BigDecimal("53.550341")),
                 new Coordinates(new BigDecimal("13.404954"), new BigDecimal("52.520008")),
                 "Hamburg", "Berlin");
@@ -120,9 +115,7 @@ class OpenRouteServiceClientTest {
                 .withHeader("Authorization", equalTo(API_KEY))
                 .willReturn(aResponse().withStatus(500)));
 
-        var client = newClient();
-
-        assertThatThrownBy(() -> client.fetchDistanceBetweenLocalities(
+        assertThatThrownBy(() -> newClient().fetchDistanceBetweenLocalities(
                 new Coordinates(BigDecimal.TEN, new BigDecimal("53")),
                 new Coordinates(new BigDecimal("13"), new BigDecimal("52")),
                 "Hamburg", "Berlin"))
@@ -137,9 +130,7 @@ class OpenRouteServiceClientTest {
                 .withHeader("Authorization", equalTo(API_KEY))
                 .willReturn(okJson(responseBody)));
 
-        var client = newClient();
-
-        assertThatThrownBy(() -> client.fetchDistanceBetweenLocalities(
+        assertThatThrownBy(() -> newClient().fetchDistanceBetweenLocalities(
                 new Coordinates(BigDecimal.TEN, new BigDecimal("53")),
                 new Coordinates(new BigDecimal("13"), new BigDecimal("52")),
                 "Hamburg", "Berlin"))
