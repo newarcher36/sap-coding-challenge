@@ -2,6 +2,7 @@ package com.sap_coding_challenge.co2.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -148,7 +149,7 @@ final class OpenRouteServiceClientTest {
     }
 
     private OpenRouteServiceClient newClient() {
-        var baseUrl = okhttp3.HttpUrl.parse(wireMock.baseUrl());
+        var baseUrl = HttpUrl.parse(wireMock.baseUrl());
         return new OpenRouteServiceClient(API_KEY, httpClient, mapper, baseUrl);
     }
 

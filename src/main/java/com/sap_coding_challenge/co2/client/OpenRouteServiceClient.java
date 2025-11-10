@@ -3,7 +3,6 @@ package com.sap_coding_challenge.co2.client;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap_coding_challenge.co2.domain.Coordinates;
-import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -26,7 +25,7 @@ public class OpenRouteServiceClient {
             MediaType.parse("application/json"),
             "Invalid JSON media type");
 
-    private final Call.Factory http;
+    private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper;
     private final HttpUrl baseUrl;
     private final String apiKey;
@@ -35,19 +34,19 @@ public class OpenRouteServiceClient {
         this(apiKey, new OkHttpClient(), new ObjectMapper(), DEFAULT_BASE_URL);
     }
 
-    OpenRouteServiceClient(String apiKey, Call.Factory http, ObjectMapper objectMapper, HttpUrl baseUrl) {
+    OpenRouteServiceClient(String apiKey, OkHttpClient httpClient, ObjectMapper objectMapper, HttpUrl baseUrl) {
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException("Missing ORS token (env ORS_TOKEN).");
         }
         this.apiKey = apiKey;
-        this.http = requireNonNull(http, "http");
+        this.httpClient = requireNonNull(httpClient, "http");
         this.objectMapper = requireNonNull(objectMapper, "objectMapper");
         this.baseUrl = requireNonNull(baseUrl, "baseUrl");
     }
 
     public Coordinates fetchCityCoordinates(String city) throws IOException {
         var request = buildFetchCityCoordinatesRequest(city);
-        try (var geoCodeSearchResponse = http.newCall(request).execute()) {
+        try (var geoCodeSearchResponse = httpClient.newCall(request).execute()) {
             checkResponseStatusCode(geoCodeSearchResponse,
                     "Could not fetch coordinates for city \"" + city + "\": HTTP ");
             var responseBody = geoCodeSearchResponse.body();
@@ -61,7 +60,7 @@ public class OpenRouteServiceClient {
     public BigDecimal fetchDistanceBetweenLocalities(Coordinates startLonLat, Coordinates endLonLat,
                                                      String startCity, String endCity) throws IOException {
         var request = buildFetchDistanceBetweenLocalitiesRequest(startLonLat, endLonLat);
-        try (var response = http.newCall(request).execute()) {
+        try (var response = httpClient.newCall(request).execute()) {
             checkResponseStatusCode(response,
                     "Could not fetch distance between \"" + startCity + "\" and \"" + endCity + "\": HTTP ");
             var responseBody = response.body();
