@@ -21,9 +21,7 @@ public class OpenRouteServiceClient {
     private static final HttpUrl DEFAULT_BASE_URL = requireNonNull(
             HttpUrl.parse("https://api.openrouteservice.org"),
             "Invalid open route service base URL");
-    private static final MediaType JSON_MEDIA_TYPE = requireNonNull(
-            MediaType.parse("application/json"),
-            "Invalid JSON media type");
+    private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json");
 
     private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -93,12 +91,12 @@ public class OpenRouteServiceClient {
     private Request buildFetchCityCoordinatesRequest(String city) {
         var geoCodeSearchUrl = baseUrl.newBuilder()
                 .addPathSegments("geocode/search")
-                .addQueryParameter("api_key", apiKey)
                 .addQueryParameter("text", city)
                 .addQueryParameter("layers", "locality")
                 .build();
         return new Request.Builder()
                 .url(geoCodeSearchUrl)
+                .addHeader("Authorization", apiKey)
                 .get()
                 .build();
     }

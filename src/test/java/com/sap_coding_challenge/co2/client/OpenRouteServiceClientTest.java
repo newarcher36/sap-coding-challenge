@@ -20,7 +20,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-final class OpenRouteServiceClientTest {
+class OpenRouteServiceClientTest {
     private static final String API_KEY = "test-key";
 
     @RegisterExtension
@@ -35,7 +35,6 @@ final class OpenRouteServiceClientTest {
     @Test
     void fetchCityCoordinatesReturnsLonLat() throws IOException {
         wireMock.stubFor(get(urlPathEqualTo("/geocode/search"))
-                .withQueryParam("api_key", matching(".+"))
                 .withQueryParam("text", matching(".+"))
                 .withQueryParam("layers", matching(".+"))
                 .willReturn(okJson("""
@@ -57,7 +56,7 @@ final class OpenRouteServiceClientTest {
         assertThat(coordinates.latitude()).isEqualByComparingTo("53.550341");
 
         wireMock.verify(getRequestedFor(urlPathEqualTo("/geocode/search"))
-                .withQueryParam("api_key", equalTo(API_KEY))
+                .withHeader("Authorization", equalTo(API_KEY))
                 .withQueryParam("text", equalTo("Hamburg"))
                 .withQueryParam("layers", equalTo("locality")));
     }
@@ -65,7 +64,7 @@ final class OpenRouteServiceClientTest {
     @Test
     void fetchCityCoordinatesPropagatesHttpErrors() {
         wireMock.stubFor(get(urlPathEqualTo("/geocode/search"))
-                .withQueryParam("api_key", equalTo(API_KEY))
+                .withHeader("Authorization", equalTo(API_KEY))
                 .withQueryParam("text", equalTo("Hamburg"))
                 .withQueryParam("layers", equalTo("locality"))
                 .willReturn(aResponse().withStatus(404)));
@@ -81,7 +80,7 @@ final class OpenRouteServiceClientTest {
     @MethodSource("invalidGeocodeBodies")
     void fetchCityCoordinatesThrowsWhenCoordinatesMissing(String responseBody) {
         wireMock.stubFor(get(urlPathEqualTo("/geocode/search"))
-                .withQueryParam("api_key", equalTo(API_KEY))
+                .withHeader("Authorization", equalTo(API_KEY))
                 .withQueryParam("text", equalTo("Atlantis"))
                 .withQueryParam("layers", equalTo("locality"))
                 .willReturn(okJson(responseBody)));

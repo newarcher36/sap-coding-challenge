@@ -12,7 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-final class OpenRouteServiceTripCalculatorTest {
+class OpenRouteServiceTripCalculatorTest {
 
     private static final String HAMBURG = "Hamburg";
     private static final String BERLIN = "Berlin";
