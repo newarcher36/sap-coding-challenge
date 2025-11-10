@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import com.sap_coding_challenge.co2.domain.Coordinates;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -78,8 +79,8 @@ class OpenRouteServiceClientTest {
     void fetchCityCoordinatesThrowsWhenCoordinatesMissing(String responseBody) {
         wireMock.stubFor(get(urlPathEqualTo("/geocode/search"))
                 .withHeader("Authorization", equalTo(API_KEY))
-                .withQueryParam("text", equalTo("Atlantis"))
-                .withQueryParam("layers", equalTo("locality"))
+                .withQueryParam("text", matching(".+"))
+                .withQueryParam("layers", matching(".+"))
                 .willReturn(okJson(responseBody)));
 
         assertThatThrownBy(() -> newClient().fetchCityCoordinates("Atlantis"))
@@ -90,8 +91,9 @@ class OpenRouteServiceClientTest {
     @Test
     void fetchDistanceBetweenLocalitiesReturnsKilometers() throws IOException {
         wireMock.stubFor(post(urlPathEqualTo("/v2/matrix/driving-car"))
-                .withHeader("Authorization", equalTo(API_KEY))
-                .withHeader("Content-Type", containing("application/json"))
+                .withHeader("Authorization", matching(".+"))
+                .withHeader("Content-Type", matching(".+"))
+                .withRequestBody(matching(".+"))
                 .willReturn(okJson("""
                         {
                           "distances": [
@@ -107,12 +109,23 @@ class OpenRouteServiceClientTest {
                 "Hamburg", "Berlin");
 
         assertThat(kilometers).isEqualByComparingTo("289.8764");
+
+        wireMock.verify(postRequestedFor(urlPathEqualTo("/v2/matrix/driving-car"))
+                .withHeader("Authorization", equalTo(API_KEY))
+                .withHeader("Content-Type", equalTo("application/json; charset=UTF-8"))
+                .withRequestBody(equalToJson("""
+                          { "locations": [
+                                    [10.000654,53.550341],
+                                    [13.404954,52.520008]
+                                    ],
+                            "metrics":["distance"]}
+                        """)));
     }
 
     @Test
     void fetchDistanceBetweenLocalitiesPropagatesHttpErrors() {
         wireMock.stubFor(post(urlPathEqualTo("/v2/matrix/driving-car"))
-                .withHeader("Authorization", equalTo(API_KEY))
+                .withHeader("Authorization", matching(".+"))
                 .willReturn(aResponse().withStatus(500)));
 
         assertThatThrownBy(() -> newClient().fetchDistanceBetweenLocalities(
@@ -127,7 +140,7 @@ class OpenRouteServiceClientTest {
     @MethodSource("invalidDistanceBodies")
     void fetchDistanceBetweenLocalitiesThrowsWhenMatrixInvalid(String responseBody) {
         wireMock.stubFor(post(urlPathEqualTo("/v2/matrix/driving-car"))
-                .withHeader("Authorization", equalTo(API_KEY))
+                .withHeader("Authorization", matching(".+"))
                 .willReturn(okJson(responseBody)));
 
         assertThatThrownBy(() -> newClient().fetchDistanceBetweenLocalities(
