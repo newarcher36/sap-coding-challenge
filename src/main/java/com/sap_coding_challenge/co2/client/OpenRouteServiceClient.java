@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNull;
 public class OpenRouteServiceClient {
     private static final HttpUrl DEFAULT_BASE_URL = requireNonNull(
             HttpUrl.parse("https://api.openrouteservice.org"),
-            "Invalid ORS base URL");
+            "Invalid open route service base URL");
     private static final MediaType JSON_MEDIA_TYPE = requireNonNull(
             MediaType.parse("application/json"),
             "Invalid JSON media type");
@@ -36,7 +36,7 @@ public class OpenRouteServiceClient {
 
     OpenRouteServiceClient(String apiKey, OkHttpClient httpClient, ObjectMapper objectMapper, HttpUrl baseUrl) {
         if (apiKey == null || apiKey.isBlank()) {
-            throw new IllegalStateException("Missing ORS token (env ORS_TOKEN).");
+            throw new IllegalStateException("Missing ORS token (env ORS_TOKEN). Please provide with the token in order to be able to fetch the data from open route service");
         }
         this.apiKey = apiKey;
         this.httpClient = requireNonNull(httpClient, "http");
