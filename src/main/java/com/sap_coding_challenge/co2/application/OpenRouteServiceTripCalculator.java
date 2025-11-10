@@ -16,6 +16,9 @@ public final class OpenRouteServiceTripCalculator {
     }
 
     public BigDecimal compute(String startCity, String endCity, String transportMethodKey) throws IOException {
+        if (startCity.equals(endCity)) {
+            return BigDecimal.ZERO;
+        }
         var startCoords = client.fetchCityCoordinates(startCity);
         var endCoords = client.fetchCityCoordinates(endCity);
         var distanceKm = client.fetchDistanceBetweenLocalities(startCoords, endCoords, startCity, endCity);

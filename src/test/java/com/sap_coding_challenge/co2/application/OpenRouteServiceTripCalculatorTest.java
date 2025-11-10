@@ -20,6 +20,14 @@ class OpenRouteServiceTripCalculatorTest {
     private final OpenRouteServiceTripCalculator calculator = new OpenRouteServiceTripCalculator(client);
 
     @Test
+    void computeReturnsZeroWhenStartEqualsEnd() throws IOException {
+        var totalKg = calculator.compute(HAMBURG, HAMBURG, "diesel-car-medium");
+
+        assertThat(totalKg).isZero();
+        verifyNoInteractions(client);
+    }
+
+    @Test
     void computeDelegatesToClientAndReturnsKilograms() throws IOException {
         var startCoords = new Coordinates(new BigDecimal("10.0"), new BigDecimal("53.0"));
         var endCoords = new Coordinates(new BigDecimal("13.0"), new BigDecimal("52.0"));
