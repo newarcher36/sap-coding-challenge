@@ -21,8 +21,8 @@ public final class OpenRouteServiceTripCalculator {
         }
         var startCoords = client.fetchCityCoordinates(startCity);
         var endCoords = client.fetchCityCoordinates(endCity);
-        var distanceKm = client.fetchDistanceBetweenLocalities(startCoords, endCoords, startCity, endCity);
         var gramsPerKm = BigDecimal.valueOf(TransportMethod.fromKey(transportMethodKey).getGramsPerKm());
+        var distanceKm = client.fetchDistanceBetweenLocalities(startCoords, endCoords, startCity, endCity);
         return gramsPerKm.multiply(distanceKm).movePointLeft(3);
     }
 }
