@@ -148,7 +148,7 @@ class OpenRouteServiceClientTest {
                 new Coordinates(new BigDecimal("13"), new BigDecimal("52")),
                 "Hamburg", "Berlin"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Could not fetch distance between \"Hamburg\" and \"Berlin\": unexpected response.");
+                .hasMessage("Could not fetch distance between \"Hamburg\" and \"Berlin\". Cities might not be reachable by car.");
     }
 
     private OpenRouteServiceClient newClient() {
@@ -198,7 +198,8 @@ class OpenRouteServiceClientTest {
                 """
                         {
                           "distances": [
-                            [0.0]
+                            [0.0,null],
+                            [null,0.0]
                           ]
                         }
                         """,

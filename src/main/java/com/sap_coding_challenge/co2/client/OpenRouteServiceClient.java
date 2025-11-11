@@ -80,9 +80,7 @@ public class OpenRouteServiceClient {
             throws IOException {
         var distanceNode = objectMapper.readTree(responseBody.byteStream()).at("/distances/0/1");
         if (distanceNode.isMissingNode() || !distanceNode.isNumber()) {
-            throw new IllegalArgumentException(
-                    "Could not fetch distance between \"" + startCity + "\" and \"" + endCity
-                            + "\": unexpected response.");
+            throw new IllegalArgumentException("Could not fetch distance between \"" + startCity + "\" and \"" + endCity + "\". Cities might not be reachable by car.");
         }
         // meters to kilometers
         return distanceNode.decimalValue().movePointLeft(3);
